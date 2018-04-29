@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Комната</title>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.js"></script>
+<script type="text/javascript">
+
+var socket = io();
+
+$(function(){
+
+    var ledsInfo = [0, 0, 0];
+
+    $(".single").each(function(i, led){
+        $(this).click(function(){
+            document.activeElement.blur();
+            socket.emit("click", i, Number(!ledsInfo[i]));
+        });
+    });
+
+    socket.on("updateLeds", function(i, val){
+        ledsInfo[i] = val;
+        var query = "#led" + (i + 1);
+        if(val && !$(query).hasClass("selected")){
+            $(query).addClass("selected");
+        }else if (!val && $(query).hasClass("selected")){
+            $(query).removeClass("selected");
+        }
+    });
+
+    socket.on("updateStatus", function(twinkling){
+        if(twinkling){
+            $("#twinkleStatus").show();
+        }else{
+            $("#twinkleStatus").hide();
+        }
+    });
+
+    $("#allOn").click(function(){
+        document.activeElement.blur();
+        socket.emit("allOn");
+    });
+
+    $("#allOff").click(function(){
+        document.activeElement.blur();
+        socket.emit("allOff");
+    });
+
+    $("#twinkle").click(function(){
+        document.activeElement.blur();
+        socket.emit("twinkle");
+    });
+});
+</script>
+<style>
+    input{
+        width: 50px;
+        height: 50px;
+        border-radius: 25px;
+        border: solid 2px #aaa;
+        outline: none;
+    }
+    .single{ background-color: white; }
+    td{ text-align: center; }
+    .selected{  background-color: #00ccff; }
+    #twinkleStatus{ display: none; }
+    #allOff, #allOn{ font-weight: bold; font-size: 25px; }
+</style>
+
+</head>
+<body>
+    <table>
+        <tr>
+            <td><input type="button" id="led1" class="single"></td>
+            <td><input type="button" id="led2" class="single"></td>
+            <td><input type="button" id="led3" class="single"></td>
+
+            <td><input value="on"  type="button" id="allOn"  class="tumbler"></td>
+            <td><input value="off" type="button" id="allOff" class="tumbler"></td>
+        </tr>
+        <tr>
+            <td>LED1</td>
+            <td>LED2</td>
+            <td>LED3</td>
+        </tr>
+    </table>
+    <button id="twinkle">twinkling</button>
+    <div id="twinkleStatus">twinkling</div>
+</body>
+</html>
