@@ -17,8 +17,16 @@ var tumblers = [
 
 var twinkling = false;
 var timeout;
+var port = "1234";
+http.listen(port);
 
-http.listen(8080);
+const { spawn } = require('child_process');
+const ip = spawn('hostname', ['-I']);
+
+ip.stdout.on('data', (data) => {
+    var data = `${data}`;
+    console.log('Open ' + data.trim() + ':' + port + ' in a browser.');
+});
 
 function handler (req, res) {
 
@@ -144,6 +152,3 @@ process.on("SIGINT", function(){
     });
     process.exit();
 });
-
-
-console.log("Started");
