@@ -7,16 +7,21 @@ var Gpio = require("onoff").Gpio;
 
 var twinkInterval;
 
-var led1 = new Gpio(14, "out"),
-    led2 = new Gpio(15, "out"),
-    led3 = new Gpio(18, "out");
 
-var tumblers = [
-    led1, led2, led3
-];
+
+var contents = fs.readFileSync('leds.txt', 'utf8');
+
+var ledsNumbers = contents.toString().split(/(\n*\s+)/).filter( function(e) { return e.trim().length > 0; } );;
+
+var tumblers = [];
+ledsNumbers.forEach((led) => {
+    tumblers.push(new Gpio(led, "out"));
+});
+
 
 var twinkling = false;
 var timeout;
+var isSwitchedOn = false;
 var port = "1234";
 http.listen(port);
 
@@ -44,7 +49,7 @@ function handler (req, res) {
 
 io.on("connection", function (socket){
 
-    socket.emit("updateStatus", twinkling);
+    socket.emit("updateStatus", twinkling, isSwitchedOn);
     for(var i = 0; i < tumblers.length; ++i){
         socket.emit("updateLeds", i, tumblers[i].readSync());
     }
@@ -91,7 +96,7 @@ io.on("connection", function (socket){
             }if (twinkling){
                 twinkleInterv(i, up, prevLed);
             }
-        }, 100);
+        }, 10);
 
     }
 
@@ -101,10 +106,10 @@ io.on("connection", function (socket){
             stopTwinkling();
             return;
         }
-
+        isSwitchedOn = false;
         twinkling = true;
-        socket.broadcast.emit("updateStatus", true);
-        socket.emit("updateStatus", true);
+        socket.broadcast.emit("updateStatus", twinkling, isSwitchedOn);
+        socket.emit("updateStatus", twinkling, isSwitchedOn);
 
         var up = true;
         if(twinkling){
@@ -118,8 +123,9 @@ io.on("connection", function (socket){
         clearTimeout(timeout);
         setAll(0);
         twinkling = false;
-        socket.broadcast.emit("updateStatus", false);
-        socket.emit("updateStatus", false);
+        isSwitchedOn = false;
+        socket.broadcast.emit("updateStatus", twinkling, isSwitchedOn);
+        socket.emit("updateStatus", twinkling, isSwitchedOn);
     }
 
     function setAll(val){
@@ -128,21 +134,31 @@ io.on("connection", function (socket){
         });
     }
 
-    socket.on("allOn", function(){
-        twinkling = false;
-        socket.broadcast.emit("updateStatus", false);
-        socket.emit("updateStatus", false);
-        clearTimeout(timeout);
-        setAll(1);
+    socket.on("toogle", function(){
+        if(isSwitchedOn){
+            switchOff();
+        }else{
+            switchOn();
+        }
     });
 
-    socket.on("allOff", function(){
+    function switchOn(){
+        clearTimeout(timeout);
+        setAll(1);
         twinkling = false;
-        socket.broadcast.emit("updateStatus", false);
-        socket.emit("updateStatus", false);
+        isSwitchedOn = true;
+        socket.emit("updateStatus", twinkling, isSwitchedOn);
+        socket.broadcast.emit("updateStatus", twinkling, isSwitchedOn);
+    }
+
+    function switchOff(){
         clearTimeout(timeout);
         setAll(0);
-    });
+        twinkling = false;
+        isSwitchedOn = false;
+        socket.emit("updateStatus", twinkling, isSwitchedOn);
+        socket.broadcast.emit("updateStatus", twinkling, isSwitchedOn);
+    }
 
 });
 

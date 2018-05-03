@@ -12,41 +12,26 @@ var socket = io();
 
 $(function(){
 
-    var ledsInfo = [0, 0, 0];
-
-    $(".single").each(function(i, led){
-        $(this).click(function(){
-            document.activeElement.blur();
-            socket.emit("click", i, Number(!ledsInfo[i]));
-        });
-    });
-
-    socket.on("updateLeds", function(i, val){
-        ledsInfo[i] = val;
-        var query = "#led" + (i + 1);
-        if(val && !$(query).hasClass("selected")){
-            $(query).addClass("selected");
-        }else if (!val && $(query).hasClass("selected")){
-            $(query).removeClass("selected");
-        }
-    });
-
-    socket.on("updateStatus", function(twinkling){
+    socket.on("updateStatus", function(twinkling, isSwitchedOn){
+        $("#panel").show();
+        $("#loading").hide();
         if(twinkling){
             $("#twinkleStatus").show();
+            $("#twinkle").text("stop").addClass("switchedOn");
         }else{
             $("#twinkleStatus").hide();
+            $("#twinkle").text("twinkle").removeClass("switchedOn");
+        }
+        if(isSwitchedOn == true){
+            $("#toogle").text("switch off").addClass("switchedOn");
+        }else{
+            $("#toogle").text("switch on").removeClass("switchedOn");
         }
     });
 
-    $("#allOn").click(function(){
+    $("#toogle").click(function(){
         document.activeElement.blur();
-        socket.emit("allOn");
-    });
-
-    $("#allOff").click(function(){
-        document.activeElement.blur();
-        socket.emit("allOff");
+        socket.emit("toogle");
     });
 
     $("#twinkle").click(function(){
@@ -56,38 +41,29 @@ $(function(){
 });
 </script>
 <style>
-    input{
-        width: 50px;
-        height: 50px;
-        border-radius: 25px;
-        border: solid 2px #aaa;
-        outline: none;
-    }
     .single{ background-color: white; }
     td{ text-align: center; }
-    .selected{  background-color: #00ccff; }
+    .switchedOn{   background: repeating-radial-gradient(#0ff, #00f); color: white;}
     #twinkleStatus{ display: none; }
-    #allOff, #allOn{ font-weight: bold; font-size: 25px; }
+    #toggle{ font-weight: bold; font-size: 25px; }
+    button{ width: 100%; padding: 20px; }
+    #panel{ display: none; }
 </style>
 
 </head>
 <body>
-    <table>
-        <tr>
-            <td><input type="button" id="led1" class="single"></td>
-            <td><input type="button" id="led2" class="single"></td>
-            <td><input type="button" id="led3" class="single"></td>
-
-            <td><input value="on"  type="button" id="allOn"  class="tumbler"></td>
-            <td><input value="off" type="button" id="allOff" class="tumbler"></td>
+    <div id="loading">loading...</div>
+    <table id="panel">
+        <tr id="ledsRow">
+            <td><button id="toogle" class="tumbler"></button></td>
         </tr>
         <tr>
-            <td>LED1</td>
-            <td>LED2</td>
-            <td>LED3</td>
+            <td>
+                <button id="twinkle"></button>
+                <div id="twinkleStatus"></div>
+            </td>
         </tr>
     </table>
-    <button id="twinkle">twinkling</button>
-    <div id="twinkleStatus">twinkling</div>
+
 </body>
 </html>
