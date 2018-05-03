@@ -2,11 +2,12 @@ Control LEDs connected to your Raspberry Pi's GPIO from your browser. The device
 <br>
 Made using this tutorial: https://www.w3schools.com/nodejs/nodejs_raspberrypi_webserver_websocket.asp.
 <br>
-Here you can check how it works: https://youtu.be/G8pKSghCudU.
+https://youtu.be/4lYXZlEJ7o0
 
 Preparations
--
-Connect 3 LEDs to your Raspberry Pi (14, 15 and 18 GPIO pins)
+------------
+- Connect LEDs to your Raspberry Pi
+- In the `leds.txt` enter GPIO numbers that you've connected to the LEDs
 
 Installing modules
 -
@@ -17,7 +18,7 @@ npm install socket.io --save
 ```
 
 Run
--
+---
 ```
 node server
 ```
