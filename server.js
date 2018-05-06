@@ -9,7 +9,7 @@ var twinkInterval;
 
 
 
-var contents = fs.readFileSync('leds.txt', 'utf8');
+var contents = fs.readFileSync(__dirname + '/leds.txt', 'utf8');
 
 var ledsNumbers = contents.toString().split(/(\n*\s+)/).filter( function(e) { return e.trim().length > 0; } );;
 
@@ -22,7 +22,7 @@ ledsNumbers.forEach((led) => {
 var twinkling = false;
 var timeout;
 var isSwitchedOn = false;
-var port = "1234";
+var port = "80";
 http.listen(port);
 
 const { spawn } = require('child_process');
