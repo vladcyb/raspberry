@@ -30,7 +30,7 @@ const ip = spawn('hostname', ['-I']);
 
 ip.stdout.on('data', (data) => {
     var data = `${data}`;
-    console.log('Open ' + data.trim() + ':' + port + ' in a browser.');
+    console.log('Open ' + data.trim() + ':' + port + ' in a browser. \n');
 });
 
 function handler (req, res) {
@@ -54,15 +54,8 @@ io.on("connection", function (socket){
         socket.emit("updateLeds", i, tumblers[i].readSync());
     }
 
-    function updateLedState(i){
-        socket.emit("updateLeds", i, tumblers[i].readSync());
-        socket.broadcast.emit("updateLeds", i, tumblers[i].readSync());
-    }
-
-
     function setLed(i, val){
         tumblers[i].writeSync(val);
-        updateLedState(i);
     }
 
     socket.on("click", function(i, localVal){
