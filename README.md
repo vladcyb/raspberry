@@ -20,7 +20,7 @@ npm install socket.io --save
 Run
 ---
 ```
-node server
+sudo node server
 ```
 
 In your browser open page `your_raspberry_pi_IP:8080`, where your_raspberry_pi_IP is local IP-address of your Raspberry in the network to which it is connected. You can check it by enter `hostname -I` in your Raspberry Pi's terminal.
